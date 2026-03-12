@@ -8,14 +8,18 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (login(email, password)) {
+
+    const success = await login(username, password);
+
+    if (success) {
       navigate("/dashboard");
     } else {
       toast.error("Credenciales incorrectas");
@@ -26,20 +30,46 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
-          <CardTitle className="text-primary text-2xl">Admin Login</CardTitle>
-          <p className="text-sm text-muted-foreground mt-1">admin@admin.com / admin123</p>
+          <CardTitle className="text-primary text-2xl">
+            Admin Login
+          </CardTitle>
+
+          <p className="text-sm text-muted-foreground mt-1">
+            rickdev / 123456789
+          </p>
         </CardHeader>
+
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+              <Label htmlFor="username">Username</Label>
+
+              <Input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
             </div>
+
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
             </div>
-            <Button type="submit" className="w-full">Ingresar</Button>
+
+            <Button type="submit" className="w-full">
+              Ingresar
+            </Button>
+
           </form>
         </CardContent>
       </Card>

@@ -1,13 +1,14 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import { loginRequest } from "@/api/authApi";
 
 interface User {
-  email: string;
-  name: string;
+  username: string;
+  role?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => boolean;
+  login: (username: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
@@ -22,15 +23,39 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = (email: string, password: string) => {
-    if (email === "admin@admin.com" && password === "admin123") {
-      setUser({ email, name: "Administrador" });
+  const login = async (username: string, password: string) => {
+    try {
+      const res = await loginRequest(username, password);
+
+      console.log("LOGIN RESPONSE:", res);
+    console.log("SUCCESS:", res?.success);
+    console.log("RESPONSE:", res?.response);
+
+
+      if (!res.success) return false;
+
+      const data = res.response;
+
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+
+      setUser({
+        username: data.username,
+        role: data.role,
+      });
+
       return true;
+    } catch (error) {
+      console.error("Login error:", error);
+      return false;
     }
-    return false;
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    setUser(null);
+  };
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>
