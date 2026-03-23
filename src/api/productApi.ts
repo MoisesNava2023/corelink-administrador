@@ -2,7 +2,7 @@ import { api } from "./apiClient";
 
 export interface CreateProductPayload {
   name: string;
-  price: number;
+  originalPrice: number;
   categoryId: number;
   branchId: number;
 }
@@ -10,12 +10,24 @@ export interface CreateProductPayload {
 export interface UpdateProductPayload {
   id: number;
   name?: string;
-  price?: number;
+  originalPrice?: number;
   categoryId?: number;
 }
 
 export const createProduct = async (data: CreateProductPayload) => {
-  const res = await api.post("/product", data);
+  const formData = new FormData();
+
+  formData.append("name", data.name);
+  formData.append("originalPrice", data.originalPrice.toString());
+  formData.append("categoryId", data.categoryId.toString());
+  formData.append("branchId", data.branchId.toString());
+
+  const res = await api.post("/product", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
   return res.data;
 };
 
