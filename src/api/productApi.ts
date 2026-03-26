@@ -2,25 +2,31 @@ import { api } from "./apiClient";
 
 export interface CreateProductPayload {
   name: string;
-  originalPrice: number;
-  categoryId: number;
+  price: number;
   branchId: number;
+  image?: File;
 }
 
 export interface UpdateProductPayload {
   id: number;
   name?: string;
-  originalPrice?: number;
-  categoryId?: number;
+  price?: number;
+  branchId: number;
+  image?: File;
 }
 
 export const createProduct = async (data: CreateProductPayload) => {
   const formData = new FormData();
 
-  formData.append("name", data.name);
-  formData.append("originalPrice", data.originalPrice.toString());
-  formData.append("categoryId", data.categoryId.toString());
-  formData.append("branchId", data.branchId.toString());
+  formData.append("Name", data.name);
+  formData.append("Price", data.price.toString());
+  formData.append("BranchId", data.branchId.toString());
+  formData.append("CategoryId", "1"); //  Temporal
+  formData.append("Stock", "0"); // 🔥 IMPORTANTE (backend lo espera)
+
+  if (data.image) {
+    formData.append("image", data.image); // ⚠️ minúscula (backend param)
+  }
 
   const res = await api.post("/product", formData, {
     headers: {
@@ -32,11 +38,26 @@ export const createProduct = async (data: CreateProductPayload) => {
 };
 
 export const updateProduct = async (data: UpdateProductPayload) => {
-  const res = await api.patch(`/product/${data.id}`, data);
-  return res.data;
-};
+  const formData = new FormData();
 
-export const deleteProduct = async (id: number) => {
-  const res = await api.delete(`/product/${id}`);
+  if (data.name) formData.append("Name", data.name);
+
+  if (data.price !== undefined) {
+    formData.append("Price", data.price.toString());
+  }
+
+  formData.append("BranchId", data.branchId.toString());
+  formData.append("Stock", "0"); // 🔥 necesario
+
+  if (data.image) {
+    formData.append("image", data.image);
+  }
+
+  const res = await api.patch(`/product/${data.id}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
   return res.data;
 };

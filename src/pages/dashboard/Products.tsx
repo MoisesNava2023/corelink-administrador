@@ -5,7 +5,6 @@ import { useProductCategories } from "@/hooks/useProductCategories";
 import {
   useCreateProduct,
   useUpdateProduct,
-  useDeleteProduct,
 } from "@/hooks/useProductMutations";
 
 import { Button } from "@/components/ui/button";
@@ -28,70 +27,61 @@ import {
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil } from "lucide-react";
 
 const branchId = 1;
 
 const Products = () => {
   const { data: products, isLoading } = useProducts(branchId);
 
-  const { data: categories, isLoading: categoriesLoading } =
-    useProductCategories();
+ // const { isLoading: categoriesLoading } = useProductCategories();
 
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
-  const deleteMutation = useDeleteProduct();
 
   const [open, setOpen] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
     price: "",
-    categoryId: "",
+    image: null as File | null,
   });
 
-  if (isLoading || categoriesLoading) {
+  if (isLoading) {
     return <div className="p-6">Cargando productos...</div>;
   }
 
-  const getCategoryName = (categoryId?: number) => {
-    const category = categories?.find((c: any) => c.id === categoryId);
-    return category?.name ?? "—";
-  };
-
-  
-  const handleDelete = (id: number) => {
-    deleteMutation.mutate(id);
-  };
-
+  // ✏️ EDIT REAL (AHORA CON PRECIO)
   const handleEdit = (p: Product) => {
+    const newName = prompt("Nuevo nombre", p.name);
+    const newPrice = prompt(
+      "Nuevo precio",
+      p.finalPrice?.toString() || "0"
+    );
+
+    if (!newName || !newPrice) return;
+
     updateMutation.mutate({
       id: p.id,
-      name: `${p.name} (editado)`,
+      name: newName,
+      price: Number(newPrice),
+      branchId: branchId,
     });
   };
 
-  
+  // 💾 CREATE REAL
   const handleSave = () => {
     if (!form.name || !form.price) return;
 
     createMutation.mutate({
       name: form.name,
-      originalPrice: Number(form.price), 
-      categoryId: form.categoryId ? Number(form.categoryId) : 1,
+      price: Number(form.price),
       branchId: branchId,
+      image: form.image || undefined,
     });
 
     setOpen(false);
-    setForm({ name: "", price: "", categoryId: "" });
+    setForm({ name: "", price: "", image: null });
   };
 
   return (
@@ -110,59 +100,28 @@ const Products = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Nombre</TableHead>
-              <TableHead>Categoría</TableHead>
               <TableHead>Precio</TableHead>
-              <TableHead>Descuento</TableHead>
               <TableHead className="w-24">Acciones</TableHead>
             </TableRow>
           </TableHeader>
 
           <TableBody>
-            {products?.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center py-6">
-                  No hay productos
-                </TableCell>
-              </TableRow>
-            )}
-
             {products?.map((p: Product) => (
               <TableRow key={p.id}>
                 <TableCell>{p.name}</TableCell>
-
-                <TableCell>
-                  {getCategoryName((p as any).categoryId)}
-                </TableCell>
 
                 <TableCell>
                   ${p.finalPrice?.toFixed(2) ?? "0.00"}
                 </TableCell>
 
                 <TableCell>
-                  {p.hasDiscount ? `${p.discountPercentage}%` : "—"}
-                </TableCell>
-
-                <TableCell>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleEdit(p)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-
-                    {/* DELETE CORRECTO */}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() =>
-                        handleDelete((p as any).branchProductId)
-                      }
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
-                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleEdit(p)}
+                  >
+                    <Pencil className="h-4 w-4" />
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
@@ -200,25 +159,16 @@ const Products = () => {
             </div>
 
             <div>
-              <Label>Categoría</Label>
-              <Select
-                value={form.categoryId}
-                onValueChange={(value) =>
-                  setForm({ ...form, categoryId: value })
+              <Label>Imagen</Label>
+              <Input
+                type="file"
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    image: e.target.files?.[0] || null,
+                  })
                 }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  {categories?.map((c: any) => (
-                    <SelectItem key={c.id} value={c.id.toString()}>
-                      {c.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              />
             </div>
           </div>
 
