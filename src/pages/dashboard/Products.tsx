@@ -4,7 +4,6 @@ import { useProducts } from "@/hooks/useProducts";
 import {
   useCreateProduct,
   useUpdateProduct,
-  useUploadProductImage,
 } from "@/hooks/useProductMutations";
 
 import { Button } from "@/components/ui/button";
@@ -36,7 +35,6 @@ const Products = () => {
 
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
-  const uploadImageMutation = useUploadProductImage();
 
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
@@ -59,7 +57,6 @@ const Products = () => {
     return <div className="p-6">Cargando productos...</div>;
   }
 
-  // 🔥 ABRIR EDIT MODAL
   const openEditModal = (p: Product) => {
     setSelectedProduct(p);
     setEditForm({
@@ -70,35 +67,22 @@ const Products = () => {
     setEditOpen(true);
   };
 
-  // 🔥 GUARDAR EDICIÓN
+  // 🔥 FIX REAL AQUÍ
   const handleEditSave = () => {
     if (!selectedProduct) return;
 
-    updateMutation.mutate(
-      {
-        id: selectedProduct.id,
-        name: editForm.name,
-        price: Number(editForm.price),
-        branchId: branchId,
-      },
-      {
-        onSuccess: () => {
-          // 🔥 subir imagen si hay
-          if (editForm.image) {
-            uploadImageMutation.mutate({
-              id: selectedProduct.id,
-              file: editForm.image,
-            });
-          }
+    updateMutation.mutate({
+      id: selectedProduct.id,
+      name: editForm.name,
+      price: Number(editForm.price),
+      branchId: branchId,
+      image: editForm.image || undefined, // 🔥 AQUI VA TODO
+    });
 
-          setEditOpen(false);
-          setSelectedProduct(null);
-        },
-      }
-    );
+    setEditOpen(false);
+    setSelectedProduct(null);
   };
 
-  // 💾 CREAR PRODUCTO
   const handleSave = () => {
     if (!form.name || !form.price) return;
 
@@ -169,7 +153,7 @@ const Products = () => {
         </Table>
       </div>
 
-      {/* ✅ MODAL CREAR */}
+      {/* CREATE */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
@@ -177,39 +161,30 @@ const Products = () => {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div>
-              <Label>Nombre</Label>
-              <Input
-                value={form.name}
-                onChange={(e) =>
-                  setForm({ ...form, name: e.target.value })
-                }
-              />
-            </div>
+            <Input
+              value={form.name}
+              onChange={(e) =>
+                setForm({ ...form, name: e.target.value })
+              }
+            />
 
-            <div>
-              <Label>Precio</Label>
-              <Input
-                type="number"
-                value={form.price}
-                onChange={(e) =>
-                  setForm({ ...form, price: e.target.value })
-                }
-              />
-            </div>
+            <Input
+              type="number"
+              value={form.price}
+              onChange={(e) =>
+                setForm({ ...form, price: e.target.value })
+              }
+            />
 
-            <div>
-              <Label>Imagen</Label>
-              <Input
-                type="file"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    image: e.target.files?.[0] || null,
-                  })
-                }
-              />
-            </div>
+            <Input
+              type="file"
+              onChange={(e) =>
+                setForm({
+                  ...form,
+                  image: e.target.files?.[0] || null,
+                })
+              }
+            />
           </div>
 
           <DialogFooter>
@@ -218,7 +193,7 @@ const Products = () => {
         </DialogContent>
       </Dialog>
 
-      {/* 🔥 MODAL EDITAR */}
+      {/* EDIT */}
       <Dialog open={editOpen} onOpenChange={setEditOpen}>
         <DialogContent>
           <DialogHeader>
@@ -226,39 +201,30 @@ const Products = () => {
           </DialogHeader>
 
           <div className="space-y-4">
-            <div>
-              <Label>Nombre</Label>
-              <Input
-                value={editForm.name}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, name: e.target.value })
-                }
-              />
-            </div>
+            <Input
+              value={editForm.name}
+              onChange={(e) =>
+                setEditForm({ ...editForm, name: e.target.value })
+              }
+            />
 
-            <div>
-              <Label>Precio</Label>
-              <Input
-                type="number"
-                value={editForm.price}
-                onChange={(e) =>
-                  setEditForm({ ...editForm, price: e.target.value })
-                }
-              />
-            </div>
+            <Input
+              type="number"
+              value={editForm.price}
+              onChange={(e) =>
+                setEditForm({ ...editForm, price: e.target.value })
+              }
+            />
 
-            <div>
-              <Label>Imagen</Label>
-              <Input
-                type="file"
-                onChange={(e) =>
-                  setEditForm({
-                    ...editForm,
-                    image: e.target.files?.[0] || null,
-                  })
-                }
-              />
-            </div>
+            <Input
+              type="file"
+              onChange={(e) =>
+                setEditForm({
+                  ...editForm,
+                  image: e.target.files?.[0] || null,
+                })
+              }
+            />
           </div>
 
           <DialogFooter>

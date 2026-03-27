@@ -1,6 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createProduct, updateProduct } from "@/api/productApi";
-import { uploadProductImage } from "@/api/productApi";
 
 export const useCreateProduct = () => {
   const qc = useQueryClient();
@@ -24,14 +23,3 @@ export const useUpdateProduct = () => {
   });
 };
 
-export const useUploadProductImage = () => {
-  const qc = useQueryClient();
-
-  return useMutation({
-    mutationFn: ({ id, file }: { id: number; file: File }) =>
-      uploadProductImage(id, file),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["products"], exact: false });
-    },
-  });
-};

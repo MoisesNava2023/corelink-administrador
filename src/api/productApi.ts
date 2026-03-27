@@ -12,7 +12,7 @@ export interface UpdateProductPayload {
   name?: string;
   price?: number;
   branchId: number;
-  image?: File;
+  image?: File; // 🔥 importante
 }
 
 export const createProduct = async (data: CreateProductPayload) => {
@@ -21,11 +21,11 @@ export const createProduct = async (data: CreateProductPayload) => {
   formData.append("Name", data.name);
   formData.append("Price", data.price.toString());
   formData.append("BranchId", data.branchId.toString());
-  formData.append("CategoryId", "1"); //  Temporal
-  formData.append("Stock", "0"); // 🔥 IMPORTANTE (backend lo espera)
+  formData.append("CategoryId", "1");
+  formData.append("Stock", "0");
 
   if (data.image) {
-    formData.append("image", data.image); // ⚠️ minúscula (backend param)
+    formData.append("image", data.image);
   }
 
   const res = await api.post("/product", formData, {
@@ -47,27 +47,14 @@ export const updateProduct = async (data: UpdateProductPayload) => {
   }
 
   formData.append("BranchId", data.branchId.toString());
-  formData.append("Stock", "0"); // 🔥 necesario
+  formData.append("Stock", "0");
 
+  // 🔥 ESTE ES EL CAMBIO IMPORTANTE
   if (data.image) {
     formData.append("image", data.image);
   }
 
   const res = await api.patch(`/product/${data.id}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
-  return res.data;
-};
-
-export const uploadProductImage = async (id: number, file: File) => {
-  const formData = new FormData();
-
-  formData.append("file", file);
-
-  const res = await api.post(`/product/${id}/image`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
