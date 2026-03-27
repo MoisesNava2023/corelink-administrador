@@ -25,9 +25,9 @@ const Sales = () => {
   const [qty, setQty] = useState("1");
 
   const addItem = () => {
-    const prod = products.find((p) => p.id === selectedProduct);
+    const prod = products.find((p) => p.id.toString() === selectedProduct);
     if (!prod) return;
-    setItems((prev) => [...prev, { productId: prod.id, productName: prod.name, quantity: parseInt(qty) || 1, unitPrice: prod.price }]);
+    setItems((prev) => [...prev, { productId: prod.id.toString(), productName: prod.name, quantity: parseInt(qty) || 1, unitPrice: prod.price }]);
     setSelectedProduct("");
     setQty("1");
   };
@@ -95,7 +95,7 @@ const Sales = () => {
                 <Select value={selectedProduct} onValueChange={setSelectedProduct}>
                   <SelectTrigger className="flex-1"><SelectValue placeholder="Producto" /></SelectTrigger>
                   <SelectContent>
-                    {products.map((p) => <SelectItem key={p.id} value={p.id}>{p.name} - ${p.price}</SelectItem>)}
+                    {products.map((p) => <SelectItem key={p.id} value={p.id.toString()}>{p.name} - ${p.price}</SelectItem>)}
                   </SelectContent>
                 </Select>
                 <Input type="number" min="1" value={qty} onChange={(e) => setQty(e.target.value)} className="w-20" placeholder="Cant" />

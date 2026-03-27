@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Product } from "@/types/Product";
 import { useProducts } from "@/hooks/useProducts";
-import { useProductCategories } from "@/hooks/useProductCategories";
 import {
   useCreateProduct,
   useUpdateProduct,
+  useUploadProductImage,
 } from "@/hooks/useProductMutations";
 
 import { Button } from "@/components/ui/button";
@@ -34,14 +34,22 @@ const branchId = 1;
 const Products = () => {
   const { data: products, isLoading } = useProducts(branchId);
 
- // const { isLoading: categoriesLoading } = useProductCategories();
-
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
+  const uploadImageMutation = useUploadProductImage();
 
   const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const [form, setForm] = useState({
+    name: "",
+    price: "",
+    image: null as File | null,
+  });
+
+  const [editForm, setEditForm] = useState({
     name: "",
     price: "",
     image: null as File | null,
@@ -51,25 +59,46 @@ const Products = () => {
     return <div className="p-6">Cargando productos...</div>;
   }
 
-  // ✏️ EDIT REAL (AHORA CON PRECIO)
-  const handleEdit = (p: Product) => {
-    const newName = prompt("Nuevo nombre", p.name);
-    const newPrice = prompt(
-      "Nuevo precio",
-      p.finalPrice?.toString() || "0"
-    );
-
-    if (!newName || !newPrice) return;
-
-    updateMutation.mutate({
-      id: p.id,
-      name: newName,
-      price: Number(newPrice),
-      branchId: branchId,
+  // 🔥 ABRIR EDIT MODAL
+  const openEditModal = (p: Product) => {
+    setSelectedProduct(p);
+    setEditForm({
+      name: p.name,
+      price: p.finalPrice?.toString() || "0",
+      image: null,
     });
+    setEditOpen(true);
   };
 
-  // 💾 CREATE REAL
+  // 🔥 GUARDAR EDICIÓN
+  const handleEditSave = () => {
+    if (!selectedProduct) return;
+
+    updateMutation.mutate(
+      {
+        id: selectedProduct.id,
+        name: editForm.name,
+        price: Number(editForm.price),
+        branchId: branchId,
+      },
+      {
+        onSuccess: () => {
+          // 🔥 subir imagen si hay
+          if (editForm.image) {
+            uploadImageMutation.mutate({
+              id: selectedProduct.id,
+              file: editForm.image,
+            });
+          }
+
+          setEditOpen(false);
+          setSelectedProduct(null);
+        },
+      }
+    );
+  };
+
+  // 💾 CREAR PRODUCTO
   const handleSave = () => {
     if (!form.name || !form.price) return;
 
@@ -99,7 +128,7 @@ const Products = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
+              <TableHead>Producto</TableHead>
               <TableHead>Precio</TableHead>
               <TableHead className="w-24">Acciones</TableHead>
             </TableRow>
@@ -108,7 +137,18 @@ const Products = () => {
           <TableBody>
             {products?.map((p: Product) => (
               <TableRow key={p.id}>
-                <TableCell>{p.name}</TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    {p.imageUrl && (
+                      <img
+                        src={p.imageUrl}
+                        alt={p.name}
+                        className="w-10 h-10 object-cover rounded"
+                      />
+                    )}
+                    <span>{p.name}</span>
+                  </div>
+                </TableCell>
 
                 <TableCell>
                   ${p.finalPrice?.toFixed(2) ?? "0.00"}
@@ -118,7 +158,7 @@ const Products = () => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleEdit(p)}
+                    onClick={() => openEditModal(p)}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -129,7 +169,7 @@ const Products = () => {
         </Table>
       </div>
 
-      {/* MODAL */}
+      {/* ✅ MODAL CREAR */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
@@ -174,6 +214,55 @@ const Products = () => {
 
           <DialogFooter>
             <Button onClick={handleSave}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 🔥 MODAL EDITAR */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Editar Producto</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div>
+              <Label>Nombre</Label>
+              <Input
+                value={editForm.name}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, name: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <Label>Precio</Label>
+              <Input
+                type="number"
+                value={editForm.price}
+                onChange={(e) =>
+                  setEditForm({ ...editForm, price: e.target.value })
+                }
+              />
+            </div>
+
+            <div>
+              <Label>Imagen</Label>
+              <Input
+                type="file"
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    image: e.target.files?.[0] || null,
+                  })
+                }
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button onClick={handleEditSave}>Guardar cambios</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

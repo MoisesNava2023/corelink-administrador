@@ -6,11 +6,6 @@ export interface Product {
   name: string;
   price: number;
   category: ProductCategory;
-}
-
-export interface Product {
-  id: number;
-  name: string;
   imageUrl?: string;
   originalPrice: number;
   finalPrice: number;
