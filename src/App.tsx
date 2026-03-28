@@ -16,7 +16,7 @@ import Clients from "@/pages/dashboard/Clients";
 import Sales from "@/pages/dashboard/Sales";
 import SaleDetail from "@/pages/dashboard/SaleDetail";
 import NotFound from "./pages/NotFound";
-
+import Orders from "@/pages/dashboard/Orders";
 
 const queryClient = new QueryClient();
 
@@ -38,6 +38,7 @@ const App = () => (
                     <Route path="clients" element={<Clients />} />
                     <Route path="sales" element={<Sales />} />
                     <Route path="sales/:id" element={<SaleDetail />} />
+                    <Route path="orders" element={<Orders />} />
                   </Route>
                   <Route path="/" element={<Navigate to="/login" replace />} />
                   <Route path="*" element={<NotFound />} />
