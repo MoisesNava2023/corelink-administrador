@@ -13,6 +13,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+
 const items = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Productos", url: "/dashboard/products", icon: Package },
@@ -20,6 +21,7 @@ const items = [
   { title: "Ventas", url: "/dashboard/sales", icon: ShoppingCart },
   { title: "Órdenes", url: "/dashboard/orders", icon: ClipboardList },
 ];
+
 
 const AppSidebar = () => {
   const { state } = useSidebar();
