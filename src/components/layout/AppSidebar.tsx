@@ -1,6 +1,5 @@
-import { LayoutDashboard, Package, Users, ShoppingCart, ClipboardSignature, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Package, Users, ShoppingCart, ClipboardList } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { useLocation } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -20,6 +19,7 @@ const items = [
   { title: "Clientes", url: "/dashboard/clients", icon: Users },
   { title: "Ventas", url: "/dashboard/sales", icon: ShoppingCart },
   { title: "Órdenes", url: "/dashboard/orders", icon: ClipboardList },
+  { title: "Categorías", url: "/dashboard/categories", icon: LayoutDashboard },
 ];
 
 
