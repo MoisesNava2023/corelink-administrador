@@ -8,3 +8,11 @@ export const loginRequest = async (username: string, password: string) => {
 
   return res.data;
 };
+
+export const refreshRequest = async (refreshToken: string) => {
+  const res = await api.post("/auth/refresh", {
+    refreshToken,
+  });
+
+  return res.data;
+};

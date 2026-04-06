@@ -21,7 +21,10 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem("user");
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
   const login = async (username: string, password: string) => {
     try {
@@ -38,11 +41,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       localStorage.setItem("accessToken", data.accessToken);
       localStorage.setItem("refreshToken", data.refreshToken);
-
-      setUser({
+      
+      const userData = {
         username: data.username,
         role: data.role,
-      });
+      };
+      
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      setUser(userData);
 
       return true;
     } catch (error) {
@@ -54,6 +61,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
     setUser(null);
   };
 

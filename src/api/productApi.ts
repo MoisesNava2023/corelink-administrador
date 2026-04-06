@@ -3,6 +3,7 @@ import { api } from "./apiClient";
 export interface CreateProductPayload {
   name: string;
   price: number;
+  categoryId: number;
   branchId: number;
   image?: File;
 }
@@ -12,7 +13,7 @@ export interface UpdateProductPayload {
   name?: string;
   price?: number;
   branchId: number;
-  image?: File; // 🔥 importante
+  image?: File;
 }
 
 export const createProduct = async (data: CreateProductPayload) => {
@@ -21,7 +22,7 @@ export const createProduct = async (data: CreateProductPayload) => {
   formData.append("Name", data.name);
   formData.append("Price", data.price.toString());
   formData.append("BranchId", data.branchId.toString());
-  formData.append("CategoryId", "1");
+  formData.append("CategoryId", data.categoryId.toString());
   formData.append("Stock", "0");
 
   if (data.image) {
@@ -49,7 +50,6 @@ export const updateProduct = async (data: UpdateProductPayload) => {
   formData.append("BranchId", data.branchId.toString());
   formData.append("Stock", "0");
 
-  // 🔥 ESTE ES EL CAMBIO IMPORTANTE
   if (data.image) {
     formData.append("image", data.image);
   }

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "@/types/Product";
 import { useProducts } from "@/hooks/useProducts";
 import {
@@ -27,6 +27,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Plus, Pencil } from "lucide-react";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { useProductCategories } from "@/hooks/useProductCategories";
 
 const branchId = 1;
 
@@ -38,8 +46,16 @@ const Products = () => {
 
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number>(1);
 
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const { data: categories, isLoading: loadingCategories } = useProductCategories();
+
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      setSelectedCategoryId(categories[0].id);
+    }
+  }, [categories]);
 
   const [form, setForm] = useState({
     name: "",
@@ -67,7 +83,6 @@ const Products = () => {
     setEditOpen(true);
   };
 
-  // 🔥 FIX REAL AQUÍ
   const handleEditSave = () => {
     if (!selectedProduct) return;
 
@@ -76,7 +91,7 @@ const Products = () => {
       name: editForm.name,
       price: Number(editForm.price),
       branchId: branchId,
-      image: editForm.image || undefined, // 🔥 AQUI VA TODO
+      image: editForm.image || undefined,
     });
 
     setEditOpen(false);
@@ -89,6 +104,7 @@ const Products = () => {
     createMutation.mutate({
       name: form.name,
       price: Number(form.price),
+      categoryId: selectedCategoryId,
       branchId: branchId,
       image: form.image || undefined,
     });
@@ -163,6 +179,7 @@ const Products = () => {
           <div className="space-y-4">
             <Input
               value={form.name}
+              placeholder="Nombre del producto"
               onChange={(e) =>
                 setForm({ ...form, name: e.target.value })
               }
@@ -170,14 +187,40 @@ const Products = () => {
 
             <Input
               type="number"
+              placeholder="Precio del producto"
               value={form.price}
               onChange={(e) =>
                 setForm({ ...form, price: e.target.value })
               }
             />
+            <Select
+              value={selectedCategoryId.toString()}
+              onValueChange={(value) =>
+                setSelectedCategoryId(Number(value))
+              }
+            >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Selecciona una categoría" />
+            </SelectTrigger>
+            <SelectContent>
+              {loadingCategories ? (
+                <SelectItem value="loading" disabled>
+                  Cargando...
+                </SelectItem>
+              ) : (
+                categories?.map((cat) => (
+                  <SelectItem key={cat.id} value={cat.id.toString()}>
+                    {cat.name}
+                  </SelectItem>
+                ))
+              )}
+              </SelectContent>
+            </Select>
+            
 
             <Input
               type="file"
+              placeholder="Suba la imagen del producto"
               onChange={(e) =>
                 setForm({
                   ...form,
