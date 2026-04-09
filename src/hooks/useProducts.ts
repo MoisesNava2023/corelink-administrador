@@ -8,5 +8,8 @@ export const useProducts = (branchId: number) => {
       const res = await api.get(`/product/branch/${branchId}`);
       return res.data.response;
     },
+    refetchOnWindowFocus: false,
+    staleTime: 5 * 60 * 1000,
+    throwOnError: false,
   });
 };

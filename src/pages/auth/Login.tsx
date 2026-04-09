@@ -35,7 +35,6 @@ const Login = () => {
           </CardTitle>
 
           <p className="text-sm text-muted-foreground mt-1">
-            rickdev / 123456789
           </p>
         </CardHeader>
 

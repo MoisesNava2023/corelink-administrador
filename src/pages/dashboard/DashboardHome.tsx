@@ -1,22 +1,39 @@
-import { useProduct } from "@/context/ProductContext";
-import { useClient } from "@/context/ClientContext";
-import { useSales } from "@/context/SalesContext";
+import { useProducts } from "@/hooks/useProducts";
+import { useOrders } from "@/hooks/useOrders";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Package, Users, ShoppingCart, DollarSign } from "lucide-react";
 
 const DashboardHome = () => {
-  const { products } = useProduct();
-  const { clients } = useClient();
-  const { sales } = useSales();
+  const { data: products } = useProducts(1);
+  const { data: orderResponse } = useOrders();
 
-  const totalRevenue =
-    sales?.reduce((acc, s) => acc + s.totalAmount, 0) ?? 0;
+  const orders = Array.isArray(orderResponse?.response)
+    ? orderResponse.response
+    : Array.isArray(orderResponse?.response?.data)
+    ? orderResponse.response.data
+    : [];
+
+  const productsCount = products?.length ?? 0;
+  const ordersCount = orders.length;
+  const uniqueClients = (() => {
+    const set = new Set<string>();
+    for (const o of orders) {
+      if (o.customerName) set.add(o.customerName);
+    }
+    return set.size;
+  })();
+  const totalIncome = orders.reduce((acc, o) => {
+    const amount = Number(o.total ?? o.totalAmount ?? 0);
+    return acc + (Number.isFinite(amount) ? amount : 0);
+  }, 0);
+
+  const isLoading = false;
 
   const stats = [
-    { label: "Productos", value: products?.length ?? 0, icon: Package },
-    { label: "Clientes", value: clients?.length ?? 0, icon: Users },
-    { label: "Ventas", value: sales?.length ?? 0, icon: ShoppingCart },
-    { label: "Ingresos", value: `$${totalRevenue.toFixed(2)}`, icon: DollarSign },
+    { label: "Productos", value: isLoading ? "Cargando..." : productsCount, icon: Package },
+    { label: "Clientes", value: isLoading ? "Cargando..." : uniqueClients, icon: Users },
+    { label: "Ventas", value: isLoading ? "Cargando..." : ordersCount, icon: ShoppingCart },
+    { label: "Ingresos", value: isLoading ? "Cargando..." : `$${totalIncome.toFixed(2)}`, icon: DollarSign },
   ];
 
   return (
